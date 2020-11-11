@@ -1,4 +1,12 @@
-# Avatar-generation-3DRW2019-
+# Avatar-generation-3DRW2019-py3
+
+## Forked
+The codebase is updated to Python 3 and tested on Python 3.8
+
+This is a fork of the [original repository](https://github.com/diegothomas/Avatar-generation-3DRW2019-) by diegothomas.
+
+
+## Original `README.md` file
 This is the source code of our 3DRW 2019 paper
 
 This code is made for academic researhc use only.

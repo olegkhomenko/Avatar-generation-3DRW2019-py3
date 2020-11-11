@@ -1,26 +1,19 @@
-#!/usr/bin/env python2
-# -*- coding: utf-8 -*-
+import tkinter as tk
+from operator import itemgetter
+from tkinter.filedialog import askopenfilename
 
-import Tkinter as tk
 import numpy as np
 import numpy.linalg as LA
-import imp
-import time
-from math import pi
-from tkFileDialog import askopenfilename
-from operator import itemgetter
-
 
 
 class MyMesh():
-    
     def __init__(self, filename):
         self.filename = filename
 
     def LoadMesh(self):
-        print "Loading ", self.filename
+        print("Loading ", self.filename)
 
-        f = open(self.filename, 'rb') 
+        f = open(self.filename, 'r')
         idx_v = 0
         idx_f = 0
         num_v = 0
@@ -28,16 +21,16 @@ class MyMesh():
 
         for line in f:
             words = line.split()
-            #read header
-            if(words[0]=="format"):
-                if(words[1]=="ascii"):
+            # read header
+            if(words[0] == "format"):
+                if(words[1] == "ascii"):
                     continue
                 else:
-                    print "cannot read this format"
+                    print("cannot read this format")
                     break
 
-            if(words[0]=="element"):
-                if(words[1]=="vertex"):
+            if(words[0] == "element"):
+                if(words[1] == "vertex"):
                     num_v = int(words[2])
                     self.Vertices = np.zeros((int(words[2]), 4), dtype = np.float32)
 
@@ -56,41 +49,39 @@ class MyMesh():
             words = line.split()
 
             self.Vertices[idx_v] = [float(words[0]), float(words[1]), float(words[2]), idx_v]
-            
 
-            #test
-            #print self.Vertices[idx_v]
+            # # test
+            # print self.Vertices[idx_v]
 
-            idx_v+=1
+            idx_v += 1
 
             if (idx_v >= num_v):
                 break
 
-        #read faces
+        # read faces
         for line in f:
             words = line.split()
-            if(len(words)<12):
-                self.Faces[idx_f]=np.array([int(words[1]), 0, int(words[2]), 0,  int(words[3]), 0])
+            if len(words) < 12:
+                self.Faces[idx_f] = np.array([int(words[1]), 0, int(words[2]), 0,  int(words[3]), 0])
             else:
-                self.Faces[idx_f]=np.array([int(words[1]), 0, int(words[2]), 0,  int(words[3]), 0])
+                self.Faces[idx_f] = np.array([int(words[1]), 0, int(words[2]), 0,  int(words[3]), 0])
 
 
-            idx_f+=1
+            idx_f += 1
 
             if(idx_f >= num_f):
                 break
 
-        #compute triangle normals
+        # compute triangle normals
         for i in range(0, len(self.Faces)):
-            cross = np.cross(self.Vertices[self.Faces[i, 2],0:3] - self.Vertices[self.Faces[i, 0],0:3], self.Vertices[self.Faces[i, 4],0:3] - self.Vertices[self.Faces[i, 0],0:3])
+            cross = np.cross(self.Vertices[self.Faces[i, 2], 0:3] - self.Vertices[self.Faces[i, 0], 0:3],
+                             self.Vertices[self.Faces[i, 4], 0:3] - self.Vertices[self.Faces[i, 0], 0:3])
             self.Normals[i] = cross / LA.norm(cross)
 
         f.close()
 
 
 class Visualize(tk.Frame):
-
-    
 
     def DrawMesh(self):
 
@@ -104,8 +95,9 @@ class Visualize(tk.Frame):
                          [np.sin(self.angley), 0., np.cos(self.angley), 0.], \
                          [0., 0., 0., 1.]], dtype=np.float32)
 
-        self.Cam_Rot = np.dot(RotX, np.dot(RotY, np.identity(4, dtype=np.float32))) #world camera rotation
-        self.Cam_Pos = np.dot(self.Cam_Rot.T, [self.translation_x, self.translation_y, 400*self.scale, 1]) #world camera position
+        self.Cam_Rot = np.dot(RotX, np.dot(RotY, np.identity(4, dtype=np.float32)))  # world camera rotation
+        self.Cam_Pos = np.dot(self.Cam_Rot.T,
+                              [self.translation_x, self.translation_y, 400*self.scale, 1])  # world camera position
 
         t = -np.dot(self.Cam_Rot, self.Cam_Pos)[0:3].reshape(3, 1)
         self.W2Cam = np.vstack((np.hstack((self.Cam_Rot[0:3,0:3], t)), [0, 0, 0, 1]))
@@ -280,10 +272,10 @@ class Visualize(tk.Frame):
                     self.opponent += [self.Corr[i][0]]
 
             self.canvas.itemconfig("apoly"+str(self.idx_f), fill="red", outline="black")
-            print "apoly"+str(self.idx_f)
+            print("apoly"+str(self.idx_f))
             for i in self.opponent:
                 self.canvas2.itemconfig("spoly"+str(i), fill="red", outline="black")
-            print "opponent: s", self.opponent
+            print("opponent: s", self.opponent)
 
         else:
             for i in range(len(self.Corr)):
@@ -291,10 +283,10 @@ class Visualize(tk.Frame):
                     self.opponent += [self.Corr[i][1]]
 
             self.canvas2.itemconfig("spoly"+str(self.idx_f-len(self.Avatar.Faces)), fill="green", outline="black")
-            print "spoly"+str(self.idx_f-len(self.Avatar.Faces))
+            print("spoly"+str(self.idx_f-len(self.Avatar.Faces)))
             for i in self.opponent:
                 self.canvas.itemconfig("apoly"+str(i), fill="green", outline="black")
-            print "opponent: a", self.opponent
+            print("opponent: a", self.opponent)
         
         
 
@@ -326,14 +318,13 @@ class Visualize(tk.Frame):
         self.EditBox.insert(tk.END,str(self.idx_f))
         self.Down = tk.Button(self.Console, text="<", command=lambda i=0: self.Update_idx_f(i))
         self.Up = tk.Button(self.Console, text=">", command=lambda i=1: self.Update_idx_f(i))
-        
+
         self.Down.pack(side="left")
         self.EditBox.pack(side="left")
         self.Up.pack(side="left")
 
         self.Window = tk.Frame(self.root)
         self.Window2 = tk.Frame(self.root)
-        
 
         self.canvas = tk.Canvas(self.Window, bg="black", height=self.Size[0], width=self.Size[1])
         self.canvas2 = tk.Canvas(self.Window2, bg="black", height=self.Size[0], width=self.Size[1])
@@ -349,8 +340,7 @@ class Visualize(tk.Frame):
         self.AvatarInfo.pack()
         self.SourceInfo.pack()
 
-        
-        
+
         self.root.bind("<Button-2>", self.center_press)
         self.root.bind("<Button-3>", self.right_press)
 
@@ -625,7 +615,7 @@ class SelectLandmarks(tk.Frame):
         self.AVATAR_LANDMARKS[self.landmark_num] = idx
         self.canvas.create_oval(self.Vertices_apix[idx,0]-3, self.Vertices_apix[idx,1]-3, self.Vertices_apix[idx,0]+3, self.Vertices_apix[idx,1]+3, fill="green", width=2, tag="landmark"+str(self.landmark_num))
         self.change_landmark(1)
-        print self.AVATAR_LANDMARKS
+        print(self.AVATAR_LANDMARKS)
 
     def destroy_window(self):
         self.root.destroy()
@@ -731,7 +721,7 @@ def main():
     filename = askopenfilename(filetypes=[('.ply','*.ply')], initialdir="../MarioHead/")
     root.destroy()
     root.mainloop()
-    print filename
+    print(filename)
 
     Avatar = MyMesh(filename)
     Avatar.LoadMesh()
@@ -925,8 +915,8 @@ class CVP(tk.Frame):
             for idx in self.cvp_a:
                 self.canvas2.create_oval(self.Vertices_apix[idx,0]-3, self.Vertices_apix[idx,1]-3, self.Vertices_apix[idx,0]+3,    self.Vertices_apix[idx,1]+3, fill="red", tag="candidate")
 
-        print "idx_a:", self.cvp_a
-        print "idx_s:", self.cvp_s
+        print("idx_a:", self.cvp_a)
+        print("idx_s:", self.cvp_s)
 
         self.Label2.config(text=u"Candidate : %s" %str(self.candidate))
         if(len(self.candidate)>0):
@@ -1040,7 +1030,7 @@ class CVP(tk.Frame):
         self.AVATAR_LANDMARKS[self.landmark_num] = idx
         self.canvas.create_oval(self.Vertices_apix[idx,0]-3, self.Vertices_apix[idx,1]-3, self.Vertices_apix[idx,0]+3, self.Vertices_apix[idx,1]+3, fill="green", width=2, tag="landmark"+str(self.landmark_num))
         self.change_landmark(1)
-        print self.AVATAR_LANDMARKS
+        print(self.AVATAR_LANDMARKS)
 
     def destroy_window(self):
         self.root.destroy()
@@ -1303,7 +1293,7 @@ class Show_Vertices(tk.Frame):
 
             
 
-            print "idx_a:", self.candidate
+            print("idx_a: ", self.candidate)
 
 
         elif(meshnum==1):
@@ -1314,7 +1304,7 @@ class Show_Vertices(tk.Frame):
             for idx in self.candidate:
                 self.canvas2.create_oval(self.Vertices_spix[idx,0]-3, self.Vertices_spix[idx,1]-3, self.Vertices_spix[idx,0]+3,    self.Vertices_spix[idx,1]+3, fill="red", tag="candidate")
 
-            print "idx_s:", self.candidate
+            print("idx_s: ", self.candidate)
 
 
     def right_press(self, event, meshnum):
@@ -1417,7 +1407,7 @@ class Show_Vertices(tk.Frame):
         self.AVATAR_LANDMARKS[self.landmark_num] = idx
         self.canvas.create_oval(self.Vertices_apix[idx,0]-3, self.Vertices_apix[idx,1]-3, self.Vertices_apix[idx,0]+3, self.Vertices_apix[idx,1]+3, fill="green", width=2, tag="landmark"+str(self.landmark_num))
         self.change_landmark(1)
-        print self.AVATAR_LANDMARKS
+        print(self.AVATAR_LANDMARKS)
 
     def destroy_window(self):
         self.root.destroy()

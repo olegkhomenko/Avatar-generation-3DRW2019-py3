@@ -1,20 +1,18 @@
-#!/usr/bin/env python2
-# -*- coding: utf-8 -*-
-
-import Tkinter as tk
 import imp
+import tkinter as tk
 from os import path
-APP_ROOT = path.dirname( path.abspath( __file__ ) )
+
+APP_ROOT = path.dirname(path.abspath(__file__))
+
 
 def main():
-    
     ''' Create Menu to load data '''
-    M = imp.load_source('Menu', APP_ROOT+'/lib/Menu.py')
+    M = imp.load_source('Menu', APP_ROOT + '/lib/Menu.py')
     root = tk.Tk()
-    root.title(u"BlendshapeMaker")
+    root.title("BlendshapeMaker")
     menu_app = M.Menu(root)
     menu_app.mainloop()
-    
+
     '''　If a data path has been selected:
         Create the main application and start the loop'''
     if (len(menu_app.filename) > 0):
@@ -22,9 +20,7 @@ def main():
         root = tk.Tk()
         app = A.BMApp(menu_app.filename, root)
         app.mainloop()
-    
-    return 0
+
 
 if __name__ == '__main__':
     main()
-    exit(0)
